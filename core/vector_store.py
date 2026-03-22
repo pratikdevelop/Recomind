@@ -144,8 +144,25 @@ def warm_up_embedder() -> None:
         else f"Local ({LOCAL_EMBED_MODEL})"
     )
     log.info(f"Embedding backend: {backend_label}")
-    dims = get_embedding_dims()
-    log.info(f"Embedder ready — dim={dims}")
+    try:
+        dims = get_embedding_dims()
+        log.info(f"Embedder ready — dim={dims}")
+    except RuntimeError as exc:
+        if EMBED_BACKEND == "docker":
+            log.warning(
+                f"Docker embedder unavailable: {exc}
+"
+                "  → Falling back to local sentence-transformers.
+"
+                "  → Set EMBED_BACKEND=local in your environment to suppress this warning."
+            )
+            # Patch backend to local so the app still starts
+            import core.vector_store as _vs
+            _vs.EMBED_BACKEND = "local"
+            dims = get_embedding_dims()
+            log.info(f"Local embedder ready — dim={dims}")
+        else:
+            raise
 
 
 # ════════════════════════════════════════════════════════════════════════════
