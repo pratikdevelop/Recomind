@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RecoMind — Pricing</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg:#0a0c10;--bg2:#0f1219;--bg3:#161b24;--border:#1e2530;--border2:#2a3344;
+    --accent:#00e5a0;--accent2:#00b87a;--accent-dim:#00e5a015;
+    --text:#c8d4e3;--text-dim:#5a6b82;--text-mid:#8a9ab0;
+    --red:#ff5f6d;--yellow:#ffd166;--mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+
+  /* NAV */
+  nav{display:flex;align-items:center;padding:16px 40px;border-bottom:1px solid var(--border);
+    background:var(--bg2);position:sticky;top:0;z-index:10}
+  .nav-logo{font-family:var(--mono);font-size:15px;color:var(--accent);text-decoration:none}
+  .nav-right{margin-left:auto;display:flex;gap:10px;align-items:center}
+  .nav-btn{font-family:var(--mono);font-size:11px;padding:6px 14px;border-radius:20px;
+    border:1px solid var(--border2);color:var(--text-mid);background:none;
+    cursor:pointer;text-decoration:none;transition:all .2s}
+  .nav-btn:hover,.nav-btn.primary{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+  .nav-btn.primary{color:#000;background:var(--accent);border-color:var(--accent)}
+  .nav-btn.primary:hover{background:var(--accent2)}
+
+  /* HERO */
+  .hero{text-align:center;padding:64px 20px 48px}
+  .hero h1{font-size:36px;font-weight:600;margin-bottom:12px}
+  .hero h1 span{color:var(--accent)}
+  .hero p{font-size:16px;color:var(--text-mid);max-width:480px;margin:0 auto 28px;line-height:1.6}
+  .billing-toggle{display:flex;align-items:center;gap:10px;justify-content:center;
+    font-size:13px;color:var(--text-mid)}
+  .toggle-track{position:relative;width:40px;height:22px;background:var(--border2);
+    border-radius:11px;cursor:pointer;transition:background .2s}
+  .toggle-track.on{background:var(--accent)}
+  .toggle-knob{position:absolute;top:3px;left:3px;width:16px;height:16px;
+    background:#fff;border-radius:50%;transition:transform .2s}
+  .toggle-track.on .toggle-knob{transform:translateX(18px)}
+  .save-badge{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent);
+    font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:10px}
+
+  /* PLANS GRID */
+  .plans{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:20px;max-width:960px;margin:0 auto;padding:0 20px 80px}
+
+  .plan-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;
+    padding:28px 24px;display:flex;flex-direction:column;gap:16px;
+    transition:border-color .2s,transform .2s;position:relative}
+  .plan-card:hover{border-color:var(--border);transform:translateY(-2px)}
+  .plan-card.popular{border-color:var(--accent)}
+
+  .popular-badge{position:absolute;top:-12px;left:50%;transform:translateX(-50%);
+    background:var(--accent);color:#000;font-family:var(--mono);font-size:10px;
+    padding:3px 12px;border-radius:10px;white-space:nowrap}
+
+  .plan-name{font-family:var(--mono);font-size:13px;color:var(--text-dim);letter-spacing:.08em}
+  .plan-price{display:flex;align-items:baseline;gap:4px}
+  .plan-price .amount{font-size:36px;font-weight:600;color:var(--text)}
+  .plan-price .period{font-size:13px;color:var(--text-dim)}
+  .plan-price .free-label{font-size:28px;font-weight:600;color:var(--accent)}
+  .plan-desc{font-size:13px;color:var(--text-mid);line-height:1.5}
+
+  .features{list-style:none;display:flex;flex-direction:column;gap:8px;flex:1}
+  .features li{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text-mid)}
+  .features li::before{content:'✓';color:var(--accent);font-family:var(--mono);
+    font-size:11px;flex-shrink:0}
+  .features li.no::before{content:'✕';color:var(--text-dim)}
+  .features li.no{color:var(--text-dim)}
+
+  .plan-btn{padding:12px;border-radius:10px;border:1px solid var(--border2);
+    background:var(--bg3);color:var(--text-mid);font-family:var(--sans);
+    font-size:14px;cursor:pointer;transition:all .2s;width:100%}
+  .plan-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .plan-btn.cta{background:var(--accent);border-color:var(--accent);color:#000;font-weight:500}
+  .plan-btn.cta:hover{background:var(--accent2)}
+  .plan-btn:disabled{opacity:.5;cursor:not-allowed}
+  .plan-btn.current{background:var(--accent-dim);border-color:var(--accent);
+    color:var(--accent);cursor:default}
+
+  /* COMPARE TABLE */
+  .compare{max-width:800px;margin:0 auto 80px;padding:0 20px}
+  .compare h2{font-family:var(--mono);font-size:14px;color:var(--text-dim);
+    letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-bottom:24px}
+  table{width:100%;border-collapse:collapse}
+  th{font-family:var(--mono);font-size:11px;color:var(--text-dim);
+    padding:10px 16px;text-align:left;border-bottom:1px solid var(--border)}
+  th:not(:first-child){text-align:center}
+  td{padding:10px 16px;font-size:13px;color:var(--text-mid);
+    border-bottom:1px solid var(--border)}
+  td:not(:first-child){text-align:center}
+  tr:last-child td{border-bottom:none}
+  .check{color:var(--accent)}
+  .cross{color:var(--text-dim);opacity:.4}
+  .highlight td{background:var(--accent-dim)}
+
+  /* FAQ */
+  .faq{max-width:640px;margin:0 auto 80px;padding:0 20px}
+  .faq h2{font-family:var(--mono);font-size:14px;color:var(--text-dim);
+    letter-spacing:.1em;text-transform:uppercase;text-align:center;margin-bottom:24px}
+  .faq-item{border:1px solid var(--border);border-radius:10px;
+    margin-bottom:8px;overflow:hidden}
+  .faq-q{padding:14px 16px;cursor:pointer;font-size:14px;color:var(--text);
+    display:flex;justify-content:space-between;align-items:center;
+    user-select:none;transition:background .15s}
+  .faq-q:hover{background:var(--bg3)}
+  .faq-arrow{font-size:11px;color:var(--text-dim);transition:transform .2s}
+  .faq-a{padding:0 16px;font-size:13px;color:var(--text-mid);line-height:1.65;
+    max-height:0;overflow:hidden;transition:max-height .3s,padding .3s}
+  .faq-item.open .faq-a{max-height:200px;padding:0 16px 14px}
+  .faq-item.open .faq-arrow{transform:rotate(180deg)}
+
+  /* Toast */
+  .toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);
+    border:1px solid var(--border2);border-radius:10px;padding:10px 16px;
+    font-size:13px;transform:translateY(16px);opacity:0;
+    transition:all .25s;z-index:100}
+  .toast.show{transform:none;opacity:1}
+  .toast.ok{border-color:var(--accent);color:var(--accent)}
+  .toast.err{border-color:var(--red);color:var(--red)}
+
+  .pay-select { display:flex; gap:8px; margin-bottom:12px; }
+  .pay-opt {
+    flex:1; padding:8px; border-radius:8px; border:1.5px solid var(--border2);
+    background:var(--bg3); color:var(--text-mid); font-size:12px;
+    cursor:pointer; text-align:center; transition:all .15s;
+  }
+  .pay-opt.active { border-color:var(--accent); color:var(--accent); background:var(--accent-dim); }
+  .pay-opt .pay-icon { font-size:18px; display:block; margin-bottom:3px; }
+  .spinner{display:inline-block;width:14px;height:14px;border:2px solid #0004;
+    border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+</style>
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">RecoMind</a>
+  <div class="nav-right">
+    <a class="nav-btn" href="/" id="dash-btn" style="display:none">Dashboard</a>
+    <a class="nav-btn primary" href="/login" id="login-btn">Sign In</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <h1>Simple, <span>transparent</span> pricing</h1>
+  <p>Start free. Upgrade when you need more power. Pay with PayPal — works everywhere in India.</p>
+  <div class="billing-toggle">
+    <span>Monthly</span>
+    <div class="toggle-track" id="billing-toggle" onclick="toggleBilling()">
+      <div class="toggle-knob"></div>
+    </div>
+    <span>Annual</span>
+    <span class="save-badge">Save 20%</span>
+  </div>
+</div>
+
+<div class="plans">
+
+  <!-- FREE -->
+  <div class="plan-card" id="card-free">
+    <div class="plan-name">FREE</div>
+    <div class="plan-price"><span class="free-label">₹0</span></div>
+    <div class="plan-desc">Perfect for trying out RecoMind with your own documents.</div>
+    <ul class="features">
+      <li>50 queries per month</li>
+      <li>5 documents</li>
+      <li>All file formats</li>
+      <li>Vector search + Re-ranker</li>
+      <li class="no">Recommendation mode</li>
+      <li class="no">API access</li>
+      <li class="no">Team workspace</li>
+    </ul>
+    <button class="plan-btn" id="btn-free" onclick="selectPlan('free')">Get Started Free</button>
+  </div>
+
+  <!-- PRO -->
+  <div class="plan-card popular" id="card-pro">
+    <div class="popular-badge">MOST POPULAR</div>
+    <div class="plan-name">PRO</div>
+    <div class="plan-price">
+      <span class="amount" id="pro-price">₹1,599</span>
+      <span class="period" id="pro-period">/ month</span>
+    </div>
+    <div class="plan-desc">For professionals who rely on AI recommendations daily.</div>
+    <ul class="features">
+      <li>Unlimited queries</li>
+      <li>100 documents</li>
+      <li>All file formats</li>
+      <li>Vector search + Re-ranker</li>
+      <li>Recommendation mode ✨</li>
+      <li>REST API access</li>
+      <li class="no">Team workspace</li>
+    </ul>
+    <div class="pay-select" id="pay-select-pro">
+      <div class="pay-opt active" id="pay-pp-pro" onclick="setPayMethod('pro','paypal')">
+        <span class="pay-icon">🅿️</span>PayPal
+      </div>
+      <div class="pay-opt" id="pay-rz-pro" onclick="setPayMethod('pro','razorpay')">
+        <span class="pay-icon">₹</span>UPI / Card
+      </div>
+    </div>
+    <button class="plan-btn cta" id="btn-pro" onclick="selectPlan('pro')">
+      Upgrade to Pro
+    </button>
+  </div>
+
+  <!-- TEAM -->
+  <div class="plan-card" id="card-team">
+    <div class="plan-name">TEAM</div>
+    <div class="plan-price">
+      <span class="amount" id="team-price">₹6,599</span>
+      <span class="period" id="team-period">/ month</span>
+    </div>
+    <div class="plan-desc">For teams that share a knowledge base and collaborate.</div>
+    <ul class="features">
+      <li>Unlimited queries</li>
+      <li>Unlimited documents</li>
+      <li>All file formats</li>
+      <li>Vector search + Re-ranker</li>
+      <li>Recommendation mode ✨</li>
+      <li>REST API + webhooks</li>
+      <li>Up to 10 team members</li>
+    </ul>
+    <div class="pay-select" id="pay-select-team">
+      <div class="pay-opt active" id="pay-pp-team" onclick="setPayMethod('team','paypal')">
+        <span class="pay-icon">🅿️</span>PayPal
+      </div>
+      <div class="pay-opt" id="pay-rz-team" onclick="setPayMethod('team','razorpay')">
+        <span class="pay-icon">₹</span>UPI / Card
+      </div>
+    </div>
+    <button class="plan-btn" id="btn-team" onclick="selectPlan('team')">
+      Upgrade to Team
+    </button>
+  </div>
+
+</div>
+
+<!-- COMPARE TABLE -->
+<div class="compare">
+  <h2>Full comparison</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Feature</th>
+        <th>Free</th>
+        <th style="color:var(--accent)">Pro</th>
+        <th>Team</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Queries / month</td><td>50</td><td>Unlimited</td><td>Unlimited</td></tr>
+      <tr><td>Documents</td><td>5</td><td>100</td><td>Unlimited</td></tr>
+      <tr class="highlight"><td>Recommendation mode</td><td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Re-ranker (CrossEncoder)</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>File formats</td><td>All</td><td>All</td><td>All</td></tr>
+      <tr class="highlight"><td>REST API access</td><td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Team members</td><td>1</td><td>1</td><td>10</td></tr>
+      <tr><td>Priority support</td><td class="cross">✕</td><td class="check">✓</td><td class="check">✓</td></tr>
+      <tr><td>Custom LLM backend</td><td class="check">✓</td><td class="check">✓</td><td class="check">✓</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- FAQ -->
+<div class="faq">
+  <h2>FAQ</h2>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Can I pay in Indian Rupees? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">Yes. We use PayPal which supports INR payments via credit card, debit card, UPI-linked PayPal accounts, and net banking.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Can I cancel anytime? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">Absolutely. Cancel from your dashboard at any time. Your plan stays active until the end of the billing period, then reverts to Free.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">What happens to my documents if I downgrade? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">Your documents are kept safely in the database. You just won't be able to upload new ones until you're within the Free plan limits.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Do you offer a free trial for Pro? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">The Free plan is your trial — use it as long as you like. When you're ready for more queries and documents, upgrade to Pro with one click.</div>
+  </div>
+  <div class="faq-item">
+    <div class="faq-q" onclick="toggleFaq(this)">Is my data safe? <span class="faq-arrow">▼</span></div>
+    <div class="faq-a">Yes. Each user's documents are fully isolated in MongoDB. Your data is never used to train any model and is never shared with other users.</div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TOKEN_KEY  = 'recomind_token';
+const payMethods = { pro: 'paypal', team: 'paypal' };
+
+function setPayMethod(plan, method) {
+  payMethods[plan] = method;
+  document.getElementById('pay-pp-'+plan).classList.toggle('active', method==='paypal');
+  document.getElementById('pay-rz-'+plan).classList.toggle('active', method==='razorpay');
+}
+const MONTHLY = {pro:{inr:'₹1,599',usd:'$19'},team:{inr:'₹6,599',usd:'$79'}};
+const ANNUAL  = {pro:{inr:'₹15,299',usd:'$182'},team:{inr:'₹63,299',usd:'$758'}};
+let isAnnual    = false;
+let currentPlan = 'free';
+
+window.addEventListener('load', async () => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) {
+    document.getElementById('dash-btn').href           = '/app';
+    document.getElementById('dash-btn').style.display  = 'inline';
+    document.getElementById('login-btn').style.display = 'none';
+    try {
+      const me = await fetch('/api/me',{headers:{'Authorization':'Bearer '+token}}).then(r=>r.json());
+      currentPlan = me.plan || 'free';
+      markCurrentPlan(currentPlan);
+    } catch {}
+  }
+  // Check if redirected back from PayPal (subscription_id in URL = approved)
+  const params = new URLSearchParams(location.search);
+  if (params.get('subscription_id')) {
+    showToast('✓ Payment approved! Your plan is being activated…', 'ok');
+    history.replaceState({}, '', '/pricing');
+    // Webhook will fire shortly — poll /api/me for up to 15s
+    let attempts = 0;
+    const poll = setInterval(async () => {
+      attempts++;
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (!token || attempts > 10) { clearInterval(poll); return; }
+      const me = await fetch('/api/me',{headers:{'Authorization':'Bearer '+token}}).then(r=>r.json());
+      if (me.plan !== 'free') {
+        clearInterval(poll);
+        currentPlan = me.plan;
+        markCurrentPlan(me.plan);
+        showToast('🎉 Plan upgraded to ' + me.plan.toUpperCase() + '!', 'ok');
+      }
+    }, 1500);
+  }
+  if (params.get('upgraded') === 'true') {
+    showToast('🎉 Plan upgraded successfully!', 'ok');
+  }
+});
+
+function markCurrentPlan(plan) {
+  ['free','pro','team'].forEach(p => {
+    const btn = document.getElementById('btn-'+p);
+    if (!btn) return;
+    if (p === plan) {
+      btn.textContent = '✓ Current Plan';
+      btn.className   = 'plan-btn current';
+      btn.disabled    = true;
+    } else if (plan !== 'free' && p === 'free') {
+      btn.textContent = 'Downgrade';
+      btn.className   = 'plan-btn';
+    }
+  });
+}
+
+function toggleBilling() {
+  isAnnual = !isAnnual;
+  const track = document.getElementById('billing-toggle');
+  track.classList.toggle('on', isAnnual);
+  const prices = isAnnual ? ANNUAL : MONTHLY;
+  document.getElementById('pro-price').textContent  = prices.pro.inr;
+  document.getElementById('team-price').textContent = prices.team.inr;
+  document.getElementById('pro-period').textContent  = isAnnual ? '/ year' : '/ month';
+  document.getElementById('team-period').textContent = isAnnual ? '/ year' : '/ month';
+}
+
+async function selectPlan(plan) {
+  if (plan === 'free') { window.location.href = '/login'; return; }
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (!token) { window.location.href = '/login'; return; }
+
+  const method = payMethods[plan] || 'paypal';
+  if (method === 'razorpay') {
+    await selectPlanRazorpay(plan, token);
+  } else {
+    await selectPlanPaypal(plan, token);
+  }
+}
+
+async function selectPlanPaypal(plan, token) {
+  const btn = document.getElementById('btn-'+plan);
+  btn.innerHTML = '<span class="spinner"></span> Connecting to PayPal…';
+  btn.disabled  = true;
+  try {
+    const r = await fetch('/api/billing/subscribe/'+plan, {
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Failed');
+    if (d.approve_url) window.location.href = d.approve_url;
+    else throw new Error('No PayPal URL returned');
+  } catch(e) {
+    showToast(e.message,'err');
+    btn.innerHTML = plan==='pro'?'Upgrade to Pro':'Upgrade to Team';
+    btn.disabled  = false;
+  }
+}
+
+async function selectPlanRazorpay(plan, token) {
+  const btn = document.getElementById('btn-'+plan);
+  btn.innerHTML = '<span class="spinner"></span> Opening payment…';
+  btn.disabled  = true;
+  try {
+    const r = await fetch('/api/razorpay/subscribe/'+plan, {
+      method:'POST', headers:{'Authorization':'Bearer '+token,'Content-Type':'application/json'},
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Failed');
+
+    const options = {
+      key:             d.key_id,
+      subscription_id: d.subscription_id,
+      name:            'RecoMind',
+      description:     plan==='pro' ? 'Pro Plan — ₹1,599/month' : 'Team Plan — ₹6,599/month',
+      handler: async function(response) {
+        showToast('✓ Payment received! Activating plan…','ok');
+        try {
+          // Verify payment and upgrade plan immediately (no webhook needed)
+          const vr = await fetch('/api/razorpay/verify', {
+            method:  'POST',
+            headers: {'Authorization':'Bearer '+token, 'Content-Type':'application/json'},
+            body: JSON.stringify({
+              razorpay_payment_id:      response.razorpay_payment_id,
+              razorpay_subscription_id: response.razorpay_subscription_id,
+              razorpay_signature:       response.razorpay_signature,
+              plan_key:                 plan,
+            }),
+          });
+          const vd = await vr.json();
+          if (vr.ok && vd.success) {
+            currentPlan = vd.plan;
+            markCurrentPlan(vd.plan);
+            showToast('🎉 Plan upgraded to '+vd.plan.toUpperCase()+'!','ok');
+          } else {
+            showToast('Payment done but activation failed: '+JSON.stringify(vd),'err');
+          }
+        } catch(e) {
+          showToast('Activation error: '+e.message,'err');
+        }
+      },
+      prefill: {},
+      theme: { color: '#00e5a0' },
+    };
+    const rzp = new Razorpay(options);
+    rzp.on('payment.failed', (r) => showToast('Payment failed: '+r.error.description,'err'));
+    rzp.open();
+  } catch(e) {
+    showToast(e.message,'err');
+  }
+  btn.innerHTML = plan==='pro'?'Upgrade to Pro':'Upgrade to Team';
+  btn.disabled  = false;
+}
+
+function toggleFaq(el) {
+  el.parentElement.classList.toggle('open');
+}
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = 'toast '+type+' show';
+  setTimeout(()=>t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>

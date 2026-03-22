@@ -1,0 +1,63 @@
+# ── Copy to .env — NEVER commit this file ─────────────────────────────────────
+
+# MongoDB Atlas
+MONGODB_URI=mongodb+srv://<user>:<password>@cluster0.xxxxx.mongodb.net/knowledge_base?retryWrites=true&w=majority
+DB_NAME=knowledge_base
+COLLECTION=docs
+INDEX_NAME=vector_idx
+
+# ── Embedding Backend ─────────────────────────────────────────────────────────
+# 'docker' → uses ai/nomic-embed-text-v1.5 via Docker Model Runner (recommended)
+# 'local'  → uses sentence-transformers (no Docker needed)
+EMBED_BACKEND=docker
+
+# Docker Model Runner embedding (your model: ai/nomic-embed-text-v1.5:latest)
+DOCKER_URL=http://localhost:12434
+DOCKER_EMBED_MODEL=nomic-embed-text-v1.5
+
+# Local fallback embedding model (only used when EMBED_BACKEND=local)
+EMBED_MODEL=BAAI/bge-small-en-v1.5
+
+# Chunking
+CHUNK_SIZE=450
+CHUNK_OVERLAP=80
+SCORE_THRESHOLD=0.68
+SEARCH_LIMIT=5
+
+# ── Auth ─────────────────────────────────────────────────────────────────────
+# Generate a strong secret: python -c "import secrets; print(secrets.token_hex(32))"
+JWT_SECRET=CHANGE-THIS-TO-A-RANDOM-64-CHAR-STRING
+JWT_LIFETIME_SECONDS=604800     # 7 days
+
+# ── LLM Backend ───────────────────────────────────────────────────────────────
+# 'docker'      → uses ai/llama3.2 via Docker Model Runner  ← YOUR SETUP
+# 'ollama'      → standalone Ollama install
+# 'groq'        → free cloud API (console.groq.com)
+# 'huggingface' → free HuggingFace Inference API
+LLM_BACKEND=docker
+
+# Docker Model Runner LLM (your model: ai/llama3.2:latest)
+DOCKER_MODEL=llama3.2
+
+# Ollama (only if LLM_BACKEND=ollama)
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.2:3b
+
+# Groq (only if LLM_BACKEND=groq — free key at console.groq.com, no CC)
+GROQ_API_KEY=
+GROQ_MODEL=llama-3.1-8b-instant
+
+# HuggingFace (only if LLM_BACKEND=huggingface — free at huggingface.co/settings/tokens)
+HF_API_KEY=
+HF_MODEL=mistralai/Mistral-7B-Instruct-v0.3
+
+MAX_TOKENS=512
+
+# Auto-ingest folder on startup
+DOCS_FOLDER=documents
+
+# ── Re-ranker ─────────────────────────────────────────────────────────────────
+RERANK_ENABLED=true
+RERANK_MODEL=cross-encoder/ms-marco-MiniLM-L-6-v2
+RERANK_TOP_K=3          # final chunks passed to LLM after re-ranking
+RERANK_CANDIDATES=15    # how many vector search results to re-rank from

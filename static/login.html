@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RecoMind — Sign In</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0a0c10; --bg2: #0f1219; --bg3: #161b24; --border: #1e2530;
+    --border2: #2a3344; --accent: #00e5a0; --accent2: #00b87a;
+    --accent-dim: #00e5a015; --text: #c8d4e3; --text-dim: #5a6b82;
+    --text-mid: #8a9ab0; --red: #ff5f6d; --mono: 'Space Mono',monospace;
+    --sans: 'DM Sans',sans-serif;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: var(--sans);
+    min-height: 100vh; display: flex; align-items: center; justify-content: center; }
+
+  .card {
+    width: 100%; max-width: 420px; padding: 40px 36px;
+    background: var(--bg2); border: 1px solid var(--border2);
+    border-radius: 16px; margin: 20px;
+  }
+  .logo { font-family: var(--mono); font-size: 18px; color: var(--accent);
+    text-align: center; margin-bottom: 6px; }
+  .tagline { font-size: 12px; color: var(--text-dim); text-align: center;
+    margin-bottom: 32px; }
+
+  /* Tabs */
+  .tabs { display: flex; background: var(--bg3); border-radius: 8px;
+    padding: 3px; margin-bottom: 28px; }
+  .tab { flex: 1; padding: 8px; border: none; background: none; border-radius: 6px;
+    font-family: var(--sans); font-size: 13px; color: var(--text-mid);
+    cursor: pointer; transition: all .15s; }
+  .tab.active { background: var(--bg2); color: var(--accent); }
+
+  /* Form */
+  .form { display: none; flex-direction: column; gap: 14px; }
+  .form.active { display: flex; }
+  label { font-size: 11px; font-family: var(--mono); color: var(--text-dim);
+    letter-spacing: .06em; margin-bottom: 4px; display: block; }
+  input[type=text], input[type=email], input[type=password] {
+    width: 100%; padding: 10px 14px; background: var(--bg3);
+    border: 1.5px solid var(--border2); border-radius: 8px;
+    color: var(--text); font-family: var(--sans); font-size: 14px; outline: none;
+    transition: border-color .2s;
+  }
+  input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px #00e5a010; }
+  .btn {
+    width: 100%; padding: 12px; border: none; border-radius: 8px;
+    background: var(--accent); color: #000; font-family: var(--sans);
+    font-size: 14px; font-weight: 500; cursor: pointer; transition: all .2s;
+    margin-top: 4px;
+  }
+  .btn:hover { background: var(--accent2); }
+  .btn:disabled { background: var(--border2); color: var(--text-dim); cursor: not-allowed; }
+  .error { font-size: 12px; color: var(--red); background: #ff5f6d12;
+    border: 1px solid #ff5f6d30; border-radius: 6px; padding: 8px 12px;
+    display: none; }
+  .error.show { display: block; }
+  .success { font-size: 12px; color: var(--accent); background: var(--accent-dim);
+    border: 1px solid #00e5a030; border-radius: 6px; padding: 8px 12px;
+    display: none; text-align: center; }
+  .success.show { display: block; }
+  .divider { display: flex; align-items: center; gap: 10px; margin: 4px 0; }
+  .divider::before, .divider::after { content:''; flex:1; height:1px; background: var(--border); }
+  .divider span { font-size: 11px; color: var(--text-dim); }
+  .forgot { font-size: 12px; color: var(--text-dim); text-align: right;
+    cursor: pointer; transition: color .15s; }
+  .forgot:hover { color: var(--accent); }
+  .plan-info { background: var(--bg3); border: 1px solid var(--border); border-radius: 8px;
+    padding: 12px 14px; font-size: 12px; color: var(--text-mid); }
+  .plan-info strong { color: var(--accent); }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="logo">RecoMind</div>
+  <div class="tagline">AI-powered recommendation engine</div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('login')">Sign In</button>
+    <button class="tab"        onclick="switchTab('register')">Create Account</button>
+  </div>
+
+  <!-- LOGIN FORM -->
+  <form class="form active" id="login-form" onsubmit="doLogin(event)">
+    <div id="login-error" class="error"></div>
+    <div>
+      <label>Email</label>
+      <input type="email" id="login-email" placeholder="you@example.com" required autocomplete="email"/>
+    </div>
+    <div>
+      <label>Password</label>
+      <input type="password" id="login-password" placeholder="••••••••" required autocomplete="current-password"/>
+    </div>
+    <div class="forgot" onclick="showForgot()">Forgot password?</div>
+    <button class="btn" type="submit" id="login-btn">Sign In</button>
+  </form>
+
+  <!-- REGISTER FORM -->
+  <form class="form" id="register-form" onsubmit="doRegister(event)">
+    <div id="reg-error"   class="error"></div>
+    <div id="reg-success" class="success"></div>
+    <div>
+      <label>Full Name</label>
+      <input type="text" id="reg-name" placeholder="Pratik Raut"/>
+    </div>
+    <div>
+      <label>Email</label>
+      <input type="email" id="reg-email" placeholder="you@example.com" required/>
+    </div>
+    <div>
+      <label>Password <span style="color:var(--text-dim);font-size:10px">(min 8 chars)</span></label>
+      <input type="password" id="reg-password" placeholder="••••••••" required minlength="8"/>
+    </div>
+    <div class="plan-info">
+      <strong>Free plan</strong> — 50 queries/month · 5 documents · 1 user<br/>
+      Upgrade anytime from the dashboard.
+    </div>
+    <button class="btn" type="submit" id="reg-btn">Create Free Account</button>
+  </form>
+
+  <!-- RESET PASSWORD FORM (from email link) -->
+  <form class="form" id="reset-form" onsubmit="doReset(event)">
+    <div id="reset-success" class="success"></div>
+    <div id="reset-error"   class="error"></div>
+    <p style="font-size:13px;color:var(--text-mid);margin-bottom:12px">Enter your new password below.</p>
+    <div>
+      <label>New Password</label>
+      <input type="password" id="reset-pw"      placeholder="••••••••" required minlength="8"/>
+    </div>
+    <div>
+      <label>Confirm Password</label>
+      <input type="password" id="reset-pw-conf" placeholder="••••••••" required minlength="8"/>
+    </div>
+    <button class="btn" type="submit">Set new password</button>
+  </form>
+
+  <!-- FORGOT PASSWORD FORM -->
+  <form class="form" id="forgot-form" onsubmit="doForgot(event)">
+    <div id="forgot-success" class="success"></div>
+    <p style="font-size:13px;color:var(--text-mid);margin-bottom:4px">
+      Enter your email and we'll send a reset link.
+    </p>
+    <div>
+      <label>Email</label>
+      <input type="email" id="forgot-email" placeholder="you@example.com" required/>
+    </div>
+    <button class="btn" type="submit">Send Reset Link</button>
+    <div class="forgot" onclick="switchTab('login')">← Back to sign in</div>
+  </form>
+</div>
+
+<script>
+const TOKEN_KEY = 'recomind_token';
+
+// Redirect only if token is actually valid
+(async () => {
+  const token = localStorage.getItem(TOKEN_KEY);
+  if (token) {
+    try {
+      const r = await fetch('/api/me', {headers: {'Authorization': 'Bearer ' + token}});
+      if (r.ok) { window.location.href = '/app'; }
+      else       { localStorage.removeItem(TOKEN_KEY); }  // stale token — clear it
+    } catch {}
+  }
+})();
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t,i) =>
+    t.classList.toggle('active', (i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+  document.getElementById(tab+'-form').classList.add('active');
+}
+
+function showForgot() {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+  document.getElementById('forgot-form').classList.add('active');
+}
+
+async function doLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('login-btn');
+  const err = document.getElementById('login-error');
+  btn.disabled = true; btn.textContent = 'Signing in…'; err.classList.remove('show');
+
+  const form = new URLSearchParams();
+  form.append('username', document.getElementById('login-email').value);
+  form.append('password', document.getElementById('login-password').value);
+
+  try {
+    const r = await fetch('/auth/login', {method:'POST',
+      headers:{'Content-Type':'application/x-www-form-urlencoded'}, body: form});
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Login failed');
+    localStorage.setItem(TOKEN_KEY, d.access_token);
+    window.location.href = '/app';
+  } catch(ex) {
+    err.textContent = ex.message; err.classList.add('show');
+    btn.disabled = false; btn.textContent = 'Sign In';
+  }
+}
+
+async function doRegister(e) {
+  e.preventDefault();
+  const btn = document.getElementById('reg-btn');
+  const err = document.getElementById('reg-error');
+  const ok  = document.getElementById('reg-success');
+  btn.disabled = true; btn.textContent = 'Creating account…';
+  err.classList.remove('show'); ok.classList.remove('show');
+
+  try {
+    const r = await fetch('/auth/register', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        email:     document.getElementById('reg-email').value,
+        password:  document.getElementById('reg-password').value,
+        full_name: document.getElementById('reg-name').value || null,
+      }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Registration failed');
+    ok.textContent = '✓ Account created! Signing you in…';
+    ok.classList.add('show');
+    // Auto-login after register
+    setTimeout(() => {
+      document.getElementById('login-email').value    = document.getElementById('reg-email').value;
+      document.getElementById('login-password').value = document.getElementById('reg-password').value;
+      switchTab('login');
+      document.getElementById('login-form').requestSubmit();
+    }, 1200);
+  } catch(ex) {
+    err.textContent = ex.message; err.classList.add('show');
+    btn.disabled = false; btn.textContent = 'Create Free Account';
+  }
+}
+
+// Auto-detect reset token in URL (works at /login and /reset-password)
+window.addEventListener('DOMContentLoaded', () => {
+  const params = new URLSearchParams(location.search);
+  if (params.get('token')) {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+    document.getElementById('reset-form').classList.add('active');
+    window._resetToken = params.get('token');
+  }
+});
+
+async function doReset(e) {
+  e.preventDefault();
+  const pw   = document.getElementById('reset-pw').value;
+  const conf = document.getElementById('reset-pw-conf').value;
+  const ok   = document.getElementById('reset-success');
+  const err  = document.getElementById('reset-error');
+  if (pw !== conf) { err.textContent='Passwords do not match'; err.classList.add('show'); return; }
+  try {
+    const r = await fetch('/auth/reset-password', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        token:    window._resetToken,
+        password: pw,
+      }),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.detail || 'Reset failed');
+    ok.textContent = '✓ Password reset! Redirecting to login…';
+    ok.classList.add('show');
+    setTimeout(() => { history.replaceState({},'','/login'); switchTab('login'); }, 1800);
+  } catch(ex) { err.textContent=ex.message; err.classList.add('show'); }
+}
+
+async function doForgot(e) {
+  e.preventDefault();
+  const ok = document.getElementById('forgot-success');
+  await fetch('/auth/forgot-password', {
+    method: 'POST', headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({email: document.getElementById('forgot-email').value}),
+  });
+  ok.textContent = '✓ If that email exists, a reset link has been sent.';
+  ok.classList.add('show');
+}
+</script>
+</body>
+</html>

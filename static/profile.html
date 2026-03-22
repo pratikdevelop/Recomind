@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RecoMind — Profile</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#0a0c10;--bg2:#0f1219;--bg3:#161b24;--bg4:#1c2330;
+  --border:#1e2530;--border2:#2a3344;
+  --accent:#00e5a0;--accent2:#00b87a;--accent-dim:#00e5a015;
+  --text:#c8d4e3;--text-dim:#5a6b82;--text-mid:#8a9ab0;
+  --red:#ff5f6d;--yellow:#ffd166;--blue:#4da6ff;
+  --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);min-height:100vh}
+
+/* NAV */
+nav{display:flex;align-items:center;padding:14px 32px;
+  background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:10}
+.nav-logo{font-family:var(--mono);font-size:13px;color:var(--accent);
+  text-decoration:none;display:flex;align-items:center;gap:8px}
+.logo-sq{width:26px;height:26px;background:var(--accent);border-radius:6px;
+  display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:#000}
+.nav-right{margin-left:auto;display:flex;gap:10px;align-items:center}
+.nav-btn{font-family:var(--mono);font-size:11px;padding:5px 12px;border-radius:20px;
+  border:1px solid var(--border2);color:var(--text-mid);background:none;
+  cursor:pointer;text-decoration:none;transition:all .2s}
+.nav-btn:hover{border-color:var(--accent);color:var(--accent)}
+.nav-btn.active{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
+
+/* LAYOUT */
+.page{max-width:900px;margin:0 auto;padding:40px 24px}
+
+/* PROFILE HEADER */
+.profile-header{display:flex;align-items:center;gap:24px;
+  background:var(--bg2);border:1px solid var(--border2);border-radius:16px;
+  padding:28px;margin-bottom:28px;position:relative;overflow:hidden}
+.profile-header::before{content:'';position:absolute;top:-60px;right:-60px;
+  width:200px;height:200px;background:radial-gradient(circle,var(--accent-dim),transparent 70%);
+  pointer-events:none}
+.avatar-wrap{position:relative;flex-shrink:0}
+.avatar-big{width:72px;height:72px;border-radius:16px;
+  background:var(--accent-dim);border:2px solid var(--accent);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:28px;font-weight:700;color:var(--accent)}
+.avatar-edit{position:absolute;bottom:-4px;right:-4px;width:22px;height:22px;
+  border-radius:6px;background:var(--bg3);border:1px solid var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;cursor:pointer;transition:all .15s}
+.avatar-edit:hover{border-color:var(--accent);color:var(--accent)}
+.profile-info{flex:1}
+.profile-name{font-size:22px;font-weight:600;margin-bottom:4px}
+.profile-email{font-size:13px;color:var(--text-mid);margin-bottom:10px;font-family:var(--mono)}
+.profile-badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge{font-family:var(--mono);font-size:10px;padding:3px 10px;border-radius:10px}
+.badge.plan-free{background:var(--bg4);color:var(--text-dim);border:1px solid var(--border2)}
+.badge.plan-pro{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent)}
+.badge.plan-team{background:#4da6ff15;color:var(--blue);border:1px solid #4da6ff40}
+.badge.verified{background:#4da6ff12;color:var(--blue);border:1px solid #4da6ff30}
+.badge.unverified{background:#ffd16612;color:var(--yellow);border:1px solid #ffd16630}
+.profile-actions{display:flex;flex-direction:column;gap:8px;flex-shrink:0}
+.btn{padding:8px 16px;border-radius:8px;font-family:var(--sans);font-size:13px;
+  cursor:pointer;transition:all .18s;border:1px solid var(--border2);
+  background:var(--bg3);color:var(--text-mid)}
+.btn:hover{border-color:var(--accent);color:var(--accent)}
+.btn.danger{border-color:#ff5f6d40;color:var(--red)}
+.btn.danger:hover{background:#ff5f6d15}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#000;font-weight:500}
+.btn.primary:hover{background:var(--accent2)}
+
+/* TABS */
+.tabs{display:flex;gap:2px;background:var(--bg2);border:1px solid var(--border);
+  border-radius:10px;padding:4px;margin-bottom:24px}
+.tab{flex:1;padding:8px;border-radius:7px;border:none;background:none;
+  font-family:var(--sans);font-size:13px;color:var(--text-dim);
+  cursor:pointer;transition:all .15s;text-align:center}
+.tab.active{background:var(--bg3);color:var(--accent)}
+.tab-panel{display:none}
+.tab-panel.active{display:block}
+
+/* CARDS */
+.card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:24px;margin-bottom:20px}
+.card-title{font-family:var(--mono);font-size:11px;letter-spacing:.1em;
+  color:var(--text-dim);text-transform:uppercase;margin-bottom:18px;
+  display:flex;align-items:center;justify-content:space-between}
+.card-title a{font-size:11px;color:var(--accent);text-decoration:none}
+
+/* USAGE */
+.usage-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:20px}
+.usage-stat{background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:14px}
+.usage-val{font-family:var(--mono);font-size:24px;font-weight:700;color:var(--accent)}
+.usage-lbl{font-size:11px;color:var(--text-dim);margin-top:3px}
+.usage-sub{font-size:11px;color:var(--text-mid);margin-top:2px}
+
+.progress-wrap{margin-bottom:8px}
+.progress-label{display:flex;justify-content:space-between;font-size:12px;
+  color:var(--text-mid);margin-bottom:5px}
+.progress-bar{height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;border-radius:3px;transition:width .6s ease}
+.progress-fill.green{background:var(--accent)}
+.progress-fill.yellow{background:var(--yellow)}
+.progress-fill.red{background:var(--red)}
+
+/* FORM */
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;font-family:var(--mono);color:var(--text-dim);
+  letter-spacing:.05em;margin-bottom:6px;display:block}
+.form-input{width:100%;padding:10px 14px;background:var(--bg3);
+  border:1.5px solid var(--border2);border-radius:8px;color:var(--text);
+  font-family:var(--sans);font-size:14px;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.form-input:disabled{opacity:.5;cursor:not-allowed}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-hint{font-size:11px;color:var(--text-dim);margin-top:4px}
+.form-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:20px}
+
+/* PLAN SECTION */
+.plan-current{display:flex;align-items:center;gap:14px;
+  background:var(--bg3);border:1px solid var(--border);border-radius:10px;
+  padding:16px;margin-bottom:16px}
+.plan-icon{font-size:24px}
+.plan-details{flex:1}
+.plan-name{font-size:16px;font-weight:500}
+.plan-desc{font-size:12px;color:var(--text-mid);margin-top:2px}
+.plan-upgrade-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.plan-option{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;
+  padding:16px;cursor:pointer;transition:all .2s;text-decoration:none;display:block}
+.plan-option:hover,.plan-option.pop{border-color:var(--accent)}
+.plan-option.pop{background:var(--accent-dim)}
+.plan-option-name{font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:4px}
+.plan-option.pop .plan-option-name{color:var(--accent)}
+.plan-option-price{font-size:18px;font-weight:600}
+.plan-option-feat{font-size:11px;color:var(--text-mid);margin-top:4px}
+
+/* FEEDBACK HISTORY */
+.fb-history-item{display:flex;align-items:flex-start;gap:12px;
+  padding:12px 0;border-bottom:1px solid var(--border)}
+.fb-history-item:last-child{border-bottom:none}
+.fb-rating{font-size:18px;flex-shrink:0;margin-top:1px}
+.fb-query{font-size:13px;color:var(--text);margin-bottom:3px}
+.fb-source{font-family:var(--mono);font-size:10px;color:var(--text-dim)}
+.fb-time{font-size:11px;color:var(--text-dim);margin-left:auto;white-space:nowrap;padding-top:2px}
+
+/* DANGER ZONE */
+.danger-zone{border-color:#ff5f6d30}
+.danger-zone .card-title{color:var(--red)}
+.danger-item{display:flex;align-items:center;justify-content:space-between;
+  padding:14px 0;border-bottom:1px solid var(--border)}
+.danger-item:last-child{border-bottom:none}
+.danger-label{font-size:14px;font-weight:500}
+.danger-desc{font-size:12px;color:var(--text-dim);margin-top:2px}
+
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--bg3);
+  border:1px solid var(--border2);border-radius:10px;padding:10px 16px;
+  font-size:13px;transform:translateY(16px);opacity:0;transition:all .25s;z-index:100}
+.toast.show{transform:none;opacity:1}
+.toast.ok{border-color:var(--accent);color:var(--accent)}
+.toast.err{border-color:var(--red);color:var(--red)}
+
+.spinner{display:inline-block;width:12px;height:12px;border:2px solid #0004;
+  border-top-color:currentColor;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.empty{text-align:center;padding:40px;color:var(--text-dim);font-size:13px}
+</style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="/">
+    <div class="logo-sq">R</div>RecoMind
+  </a>
+  <div class="nav-right">
+    <a class="nav-btn" href="/app">Dashboard</a>
+    <a class="nav-btn" href="/pricing">Pricing</a>
+    <a class="nav-btn active" href="/profile">Profile</a>
+    <button class="nav-btn" onclick="logout()" style="border-color:var(--red);color:var(--red)">Sign out</button>
+  </div>
+</nav>
+
+<div class="page">
+
+  <!-- PROFILE HEADER -->
+  <div class="profile-header">
+    <div class="avatar-wrap">
+      <div class="avatar-big" id="avatar-initials">?</div>
+      <div class="avatar-edit" title="Change avatar">✏️</div>
+    </div>
+    <div class="profile-info">
+      <div class="profile-name" id="profile-name">Loading…</div>
+      <div class="profile-email" id="profile-email"></div>
+      <div class="profile-badges" style="flex-wrap:wrap;gap:8px">
+        <span class="badge" id="plan-badge">free</span>
+        <span class="badge" id="verify-badge">unverified</span>
+        <button id="resend-verify-btn" onclick="resendVerification()"
+          style="display:none;align-items:center;gap:5px;padding:3px 10px;
+            border-radius:10px;border:1px solid #ffd16650;background:#ffd16612;
+            color:var(--yellow);font-size:10px;cursor:pointer;transition:all .2s;
+            font-family:var(--mono)">
+          ✉ Send verification email
+        </button>
+      </div>
+    </div>
+    <div class="profile-actions">
+      <a class="btn primary" href="/app">Open App</a>
+      <a class="btn" href="/pricing">Upgrade plan</a>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('overview')">Overview</button>
+    <button class="tab"        onclick="switchTab('settings')">Settings</button>
+    <button class="tab"        onclick="switchTab('plan')">Plan & Billing</button>
+    <button class="tab"        onclick="switchTab('feedback')">My Feedback</button>
+    <button class="tab"        onclick="switchTab('danger')">Account</button>
+  </div>
+
+  <!-- ── OVERVIEW TAB ── -->
+  <div class="tab-panel active" id="tab-overview">
+    <div class="card">
+      <div class="card-title">Usage this month</div>
+      <div class="usage-grid">
+        <div class="usage-stat">
+          <div class="usage-val" id="u-queries">—</div>
+          <div class="usage-lbl">Queries used</div>
+          <div class="usage-sub" id="u-queries-limit"></div>
+        </div>
+        <div class="usage-stat">
+          <div class="usage-val" id="u-chunks">—</div>
+          <div class="usage-lbl">Chunks indexed</div>
+          <div class="usage-sub" id="u-sources"></div>
+        </div>
+        <div class="usage-stat">
+          <div class="usage-val" id="u-likes">—</div>
+          <div class="usage-lbl">👍 Feedback given</div>
+          <div class="usage-sub" id="u-sat"></div>
+        </div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Query usage</span>
+          <span id="u-query-pct">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill green" id="u-query-bar" style="width:0%"></div></div>
+      </div>
+      <div class="progress-wrap">
+        <div class="progress-label">
+          <span>Document usage</span>
+          <span id="u-doc-pct">0%</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill green" id="u-doc-bar" style="width:0%"></div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Most liked sources <a href="#" onclick="switchTab('feedback');return false">View all →</a></div>
+      <div id="top-sources-list"><div class="empty">No feedback yet — start chatting and rating answers!</div></div>
+    </div>
+  </div>
+
+  <!-- ── SETTINGS TAB ── -->
+  <div class="tab-panel" id="tab-settings">
+    <div class="card">
+      <div class="card-title">Personal information</div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Full name</label>
+          <input class="form-input" id="s-name" type="text" placeholder="Your name"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="form-input" id="s-email" type="email" disabled/>
+          <div class="form-hint">Email cannot be changed</div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn primary" onclick="saveProfile()">Save changes</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Change password</div>
+      <div class="form-group">
+        <label class="form-label">Current password</label>
+        <input class="form-input" id="s-old-pw" type="password" placeholder="••••••••"/>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">New password</label>
+          <input class="form-input" id="s-new-pw" type="password" placeholder="••••••••"/>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Confirm new password</label>
+          <input class="form-input" id="s-confirm-pw" type="password" placeholder="••••••••"/>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn primary" onclick="changePassword()">Update password</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Preferences</div>
+      <div class="form-group">
+        <label class="form-label">Default LLM backend</label>
+        <select class="form-input" id="s-backend">
+          <option value="docker">Docker Model Runner (local)</option>
+          <option value="ollama">Ollama (local)</option>
+          <option value="groq">Groq (free cloud)</option>
+          <option value="huggingface">HuggingFace (free cloud)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Default mode</label>
+        <select class="form-input" id="s-mode">
+          <option value="qa">QA — question & answer</option>
+          <option value="recommend">Recommend — structured recommendation card</option>
+          <option value="search">Search — raw results only</option>
+        </select>
+      </div>
+      <div class="form-actions">
+        <button class="btn primary" onclick="savePrefs()">Save preferences</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── PLAN TAB ── -->
+  <div class="tab-panel" id="tab-plan">
+    <div class="card">
+      <div class="card-title">Current plan</div>
+      <div class="plan-current">
+        <div class="plan-icon" id="plan-icon">🆓</div>
+        <div class="plan-details">
+          <div class="plan-name" id="plan-name-big">Free</div>
+          <div class="plan-desc" id="plan-desc">50 queries/month · 5 documents · 1 user</div>
+        </div>
+        <div id="plan-action"></div>
+      </div>
+
+      <div class="card-title" style="margin-top:20px">Upgrade your plan</div>
+      <div class="plan-upgrade-grid">
+        <a class="plan-option pop" href="/pricing">
+          <div class="plan-option-name">PRO</div>
+          <div class="plan-option-price">₹1,599<span style="font-size:12px;font-weight:400;color:var(--text-dim)">/mo</span></div>
+          <div class="plan-option-feat">Unlimited queries · 100 docs · Recommendation mode</div>
+        </a>
+        <a class="plan-option" href="/pricing">
+          <div class="plan-option-name">TEAM</div>
+          <div class="plan-option-price">₹6,599<span style="font-size:12px;font-weight:400;color:var(--text-dim)">/mo</span></div>
+          <div class="plan-option-feat">Unlimited everything · 10 users · API access</div>
+        </a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Billing</div>
+      <div style="font-size:13px;color:var(--text-mid);line-height:1.7">
+        <p>Payments are processed securely via <strong style="color:var(--text)">Razorpay</strong> (India — UPI, cards, net banking) or <strong style="color:var(--text)">PayPal</strong> (international).</p>
+        <p style="margin-top:8px">To manage your subscription, cancel, or view invoices — contact support or visit your PayPal/Razorpay dashboard.</p>
+      </div>
+      <div id="cancel-section" style="display:none;margin-top:16px">
+        <button class="btn danger" onclick="cancelPlan()">Cancel subscription</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── FEEDBACK TAB ── -->
+  <div class="tab-panel" id="tab-feedback">
+    <div class="card">
+      <div class="card-title">Feedback summary</div>
+      <div class="usage-grid" style="margin-bottom:0">
+        <div class="usage-stat">
+          <div class="usage-val" id="fb-total">—</div>
+          <div class="usage-lbl">Total ratings</div>
+        </div>
+        <div class="usage-stat">
+          <div class="usage-val" style="color:var(--accent)" id="fb-likes2">—</div>
+          <div class="usage-lbl">👍 Helpful</div>
+        </div>
+        <div class="usage-stat">
+          <div class="usage-val" style="color:var(--red)" id="fb-dislikes2">—</div>
+          <div class="usage-lbl">👎 Not helpful</div>
+        </div>
+        <div class="usage-stat">
+          <div class="usage-val" id="fb-sat2">—</div>
+          <div class="usage-lbl">Satisfaction</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Recent feedback</div>
+      <div id="feedback-list"><div class="empty">No feedback yet</div></div>
+    </div>
+  </div>
+
+  <!-- ── DANGER / ACCOUNT TAB ── -->
+  <div class="tab-panel" id="tab-danger">
+    <div class="card danger-zone">
+      <div class="card-title">Account actions</div>
+      <div class="danger-item">
+        <div>
+          <div class="danger-label">Export my data</div>
+          <div class="danger-desc">Download all your documents, feedback, and account info as JSON</div>
+        </div>
+        <button class="btn" onclick="exportData()">Export</button>
+      </div>
+      <div class="danger-item">
+        <div>
+          <div class="danger-label">Clear all documents</div>
+          <div class="danger-desc">Delete all indexed chunks. Your account stays active.</div>
+        </div>
+        <button class="btn danger" onclick="clearDocs()">Clear docs</button>
+      </div>
+      <div class="danger-item">
+        <div>
+          <div class="danger-label">Delete account</div>
+          <div class="danger-desc">Permanently delete your account and all data. This cannot be undone.</div>
+        </div>
+        <button class="btn danger" onclick="deleteAccount()">Delete account</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TOKEN_KEY = 'recomind_token';
+let userData    = {};
+let statsData   = {};
+let fbData      = {};
+
+function getToken() { return localStorage.getItem(TOKEN_KEY); }
+function authH()    { return {'Authorization':'Bearer '+getToken(),'Content-Type':'application/json'}; }
+function logout()   { localStorage.removeItem(TOKEN_KEY); window.location.href='/'; }
+
+// ── Guard — verify token is valid before showing page ───────────────────────
+(async () => {
+  const token = getToken();
+  if (!token) { window.location.href = '/login'; return; }
+  const r = await fetch('/api/me', {headers: {'Authorization': 'Bearer ' + token}});
+  if (!r.ok) {
+    localStorage.removeItem('recomind_token');
+    window.location.href = '/login';
+  }
+})();
+
+// ── Init ───────────────────────────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  await Promise.all([loadUser(), loadStats(), loadFeedback()]);
+  loadPrefs();
+  showVerifyBanner();
+});
+
+function showVerifyBanner() {
+  if (!userData.is_verified) {
+    const banner = document.createElement('div');
+    banner.style.cssText = `background:#ffd16612;border:1px solid #ffd16630;
+      border-radius:10px;padding:12px 16px;margin-bottom:20px;
+      font-size:13px;color:var(--yellow);display:flex;
+      align-items:center;justify-content:space-between;gap:12px`;
+    banner.innerHTML = `
+      <span>📧 Your email is not verified. Verify it to unlock all features.</span>
+      <button onclick="resendVerification()" style="padding:6px 14px;border-radius:6px;
+        border:1px solid #ffd16650;background:none;color:var(--yellow);
+        font-size:12px;cursor:pointer;white-space:nowrap">Send verification email</button>
+    `;
+    const panel = document.getElementById('tab-overview');
+    panel.insertBefore(banner, panel.firstChild);
+  }
+}
+
+async function loadUser() {
+  try {
+    userData = await fetch('/api/me', {headers: authH()}).then(r => r.json());
+    const name   = userData.full_name || userData.email.split('@')[0];
+    const initials = name.slice(0,2).toUpperCase();
+    document.getElementById('avatar-initials').textContent = initials;
+    document.getElementById('profile-name').textContent    = userData.full_name || '—';
+    document.getElementById('profile-email').textContent   = userData.email;
+    document.getElementById('s-name').value                = userData.full_name || '';
+    document.getElementById('s-email').value               = userData.email;
+
+    // Plan badge
+    const pb = document.getElementById('plan-badge');
+    pb.textContent = userData.plan;
+    pb.className   = `badge plan-${userData.plan}`;
+
+    // Verify badge
+    const vb = document.getElementById('verify-badge');
+    if (userData.is_verified) {
+      vb.textContent  = '✓ verified';
+      vb.className    = 'badge verified';
+      vb.style.cursor = 'default';
+    } else {
+      vb.textContent  = '⚠ unverified — click to verify';
+      vb.className    = 'badge unverified';
+      vb.style.cursor = 'pointer';
+      vb.title        = 'Click to send verification email';
+      vb.onclick      = resendVerification;
+    }
+
+    // Plan tab
+    const planIcons = {free:'🆓', pro:'⭐', team:'👥'};
+    const planDescs = {
+      free:  '50 queries/month · 5 documents · 1 user',
+      pro:   'Unlimited queries · 100 documents · Recommendation mode',
+      team:  'Unlimited everything · 10 users · API access',
+    };
+    document.getElementById('plan-icon').textContent    = planIcons[userData.plan] || '🆓';
+    document.getElementById('plan-name-big').textContent= userData.plan.toUpperCase();
+    document.getElementById('plan-desc').textContent    = planDescs[userData.plan] || '';
+
+    if (userData.plan !== 'free') {
+      document.getElementById('cancel-section').style.display = 'block';
+    }
+
+    // Usage
+    document.getElementById('u-queries').textContent = userData.queries_this_month || 0;
+    const qLimit = userData.queries_limit || 50;
+    const qUsed  = userData.queries_this_month || 0;
+    const qPct   = Math.min(Math.round(qUsed/qLimit*100), 100);
+    document.getElementById('u-queries-limit').textContent = `of ${qLimit} limit`;
+    document.getElementById('u-query-pct').textContent     = qPct + '%';
+    const qBar = document.getElementById('u-query-bar');
+    qBar.style.width = qPct + '%';
+    qBar.className   = 'progress-fill ' + (qPct >= 90 ? 'red' : qPct >= 70 ? 'yellow' : 'green');
+  } catch(e) { console.error('loadUser', e); }
+}
+
+async function loadStats() {
+  try {
+    statsData = await fetch('/api/stats', {headers: authH()}).then(r => r.json());
+    document.getElementById('u-chunks').textContent  = statsData.total_chunks || 0;
+    document.getElementById('u-sources').textContent = `${statsData.unique_sources || 0} source files`;
+
+    const dLimit = statsData.docs_limit || 5;
+    const dUsed  = statsData.unique_sources || 0;
+    const dPct   = dLimit >= 999999 ? 0 : Math.min(Math.round(dUsed/dLimit*100), 100);
+    document.getElementById('u-doc-pct').textContent   = dLimit >= 999999 ? 'Unlimited' : dPct+'%';
+    const dBar = document.getElementById('u-doc-bar');
+    dBar.style.width = dPct + '%';
+    dBar.className   = 'progress-fill '+(dPct>=90?'red':dPct>=70?'yellow':'green');
+  } catch(e) { console.error('loadStats', e); }
+}
+
+async function loadFeedback() {
+  try {
+    fbData = await fetch('/api/feedback/stats', {headers: authH()}).then(r => r.json());
+    document.getElementById('u-likes').textContent    = fbData.likes || 0;
+    document.getElementById('u-sat').textContent      = (fbData.satisfaction||0) + '% satisfaction';
+    document.getElementById('fb-total').textContent   = fbData.total || 0;
+    document.getElementById('fb-likes2').textContent  = fbData.likes || 0;
+    document.getElementById('fb-dislikes2').textContent = fbData.dislikes || 0;
+    document.getElementById('fb-sat2').textContent    = (fbData.satisfaction||0) + '%';
+
+    // Top sources
+    const srcEl = document.getElementById('top-sources-list');
+    if (fbData.top_sources && fbData.top_sources.length) {
+      srcEl.innerHTML = fbData.top_sources.map(s => `
+        <div style="display:flex;justify-content:space-between;align-items:center;
+          padding:8px 0;border-bottom:1px solid var(--border);font-size:13px">
+          <span style="color:var(--text-mid);font-family:var(--mono);font-size:11px">${s.source}</span>
+          <span style="color:var(--accent);font-family:var(--mono);font-size:11px">+${s.likes} 👍</span>
+        </div>`).join('');
+    }
+
+    // Recent feedback
+    const fbEl = document.getElementById('feedback-list');
+    if (fbData.recent && fbData.recent.length) {
+      fbEl.innerHTML = fbData.recent.map(f => `
+        <div class="fb-history-item">
+          <div class="fb-rating">${f.rating > 0 ? '👍' : '👎'}</div>
+          <div style="flex:1">
+            <div class="fb-query">${f.query || '—'}</div>
+            <div class="fb-source">${f.source || '—'}</div>
+          </div>
+          <div class="fb-time">${f.updated_at ? new Date(f.updated_at).toLocaleDateString() : ''}</div>
+        </div>`).join('');
+    }
+  } catch(e) { console.error('loadFeedback', e); }
+}
+
+// ── Tabs ───────────────────────────────────────────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const names = ['overview','settings','plan','feedback','danger'];
+    t.classList.toggle('active', names[i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+}
+
+// ── Save profile ───────────────────────────────────────────────────────────
+async function saveProfile() {
+  const name = document.getElementById('s-name').value.trim();
+  try {
+    const r = await fetch(`/users/${userData.id}`, {
+      method:  'PATCH',
+      headers: authH(),
+      body:    JSON.stringify({full_name: name}),
+    });
+    if (r.ok) {
+      showToast('Profile saved ✓', 'ok');
+      document.getElementById('profile-name').textContent = name || userData.email.split('@')[0];
+      document.getElementById('avatar-initials').textContent = (name||userData.email).slice(0,2).toUpperCase();
+    } else {
+      showToast('Save failed', 'err');
+    }
+  } catch(e) { showToast(e.message, 'err'); }
+}
+
+// ── Change password ────────────────────────────────────────────────────────
+async function changePassword() {
+  const oldPw  = document.getElementById('s-old-pw').value;
+  const newPw  = document.getElementById('s-new-pw').value;
+  const confPw = document.getElementById('s-confirm-pw').value;
+
+  if (!oldPw)             { showToast('Enter your current password', 'err'); return; }
+  if (newPw !== confPw)   { showToast('New passwords do not match', 'err'); return; }
+  if (newPw.length < 8)   { showToast('Password must be at least 8 characters', 'err'); return; }
+  if (newPw === oldPw)    { showToast('New password must differ from current', 'err'); return; }
+
+  try {
+    // Single call — backend verifies old pw and sets new one
+    const r = await fetch('/api/auth/change-password', {
+      method:  'POST',
+      headers: authH(),
+      body:    JSON.stringify({old_password: oldPw, new_password: newPw}),
+    });
+    const d = await r.json();
+    if (r.ok) {
+      showToast('Password updated ✓', 'ok');
+      ['s-old-pw','s-new-pw','s-confirm-pw'].forEach(id =>
+        document.getElementById(id).value = '');
+    } else {
+      showToast(d.detail || 'Failed to update password', 'err');
+    }
+  } catch(e) { showToast(e.message, 'err'); }
+}
+
+// ── Preferences (localStorage) ─────────────────────────────────────────────
+function savePrefs() {
+  localStorage.setItem('pref_backend', document.getElementById('s-backend').value);
+  localStorage.setItem('pref_mode',    document.getElementById('s-mode').value);
+  showToast('Preferences saved ✓', 'ok');
+}
+function loadPrefs() {
+  const b = localStorage.getItem('pref_backend');
+  const m = localStorage.getItem('pref_mode');
+  if (b) document.getElementById('s-backend').value = b;
+  if (m) document.getElementById('s-mode').value    = m;
+}
+
+// ── Cancel plan ────────────────────────────────────────────────────────────
+async function cancelPlan() {
+  if (!confirm('Cancel your subscription? You will revert to the Free plan.')) return;
+  try {
+    const r = await fetch('/api/billing/cancel', {method:'POST', headers: authH()});
+    const d = await r.json();
+    if (r.ok) { showToast('Subscription cancelled. Plan reverted to Free.', 'ok'); await loadUser(); }
+    else       showToast(d.detail || 'Cancel failed', 'err');
+  } catch(e) { showToast(e.message,'err'); }
+}
+
+// ── Export data ────────────────────────────────────────────────────────────
+async function exportData() {
+  const stats    = await fetch('/api/stats',          {headers:authH()}).then(r=>r.json());
+  const feedback = await fetch('/api/feedback/stats', {headers:authH()}).then(r=>r.json());
+  const data = { user: userData, stats, feedback, exported_at: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url; a.download = 'recomind-export.json'; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Data exported ✓', 'ok');
+}
+
+// ── Clear docs ─────────────────────────────────────────────────────────────
+async function clearDocs() {
+  if (!confirm('Delete all your indexed documents? This cannot be undone.')) return;
+  try {
+    const sources = statsData.sources || [];
+    for (const src of sources) {
+      await fetch(`/api/documents?source=${encodeURIComponent(src)}`,
+        {method:'DELETE', headers:authH()});
+    }
+    showToast(`Cleared ${sources.length} source(s) ✓`, 'ok');
+    await loadStats();
+  } catch(e) { showToast(e.message,'err'); }
+}
+
+// ── Delete account ─────────────────────────────────────────────────────────
+async function deleteAccount() {
+  const confirm1 = confirm('This will permanently delete your account and ALL data. Are you sure?');
+  if (!confirm1) return;
+  const input = prompt('Type your email to confirm:');
+  if (input !== userData.email) { showToast('Email did not match — account not deleted.','err'); return; }
+  try {
+    const r = await fetch(`/users/${userData.id}`, {method:'DELETE', headers:authH()});
+    if (r.ok || r.status === 204) {
+      localStorage.removeItem(TOKEN_KEY);
+      alert('Account deleted. Goodbye!');
+      window.location.href = '/';
+    } else {
+      showToast('Delete failed — contact support','err');
+    }
+  } catch(e) { showToast(e.message,'err'); }
+}
+
+async function resendVerification() {
+  const badge = document.getElementById('verify-badge');
+  badge.textContent = '⏳ Sending…';
+  try {
+    const r = await fetch('/api/auth/resend-verification', {
+      method: 'POST', headers: authH()
+    });
+    const d = await r.json();
+    if (r.ok) {
+      badge.textContent = '📧 Check your email!';
+      showToast('Verification email sent! Check your inbox.', 'ok');
+    } else {
+      if (d.detail && d.detail.includes('already')) {
+        badge.textContent = '✓ verified';
+        badge.className   = 'badge verified';
+        showToast('Email already verified!', 'ok');
+      } else {
+        badge.textContent = '⚠ unverified — click to retry';
+        showToast(d.detail || 'Failed to send email', 'err');
+      }
+    }
+  } catch(e) {
+    badge.textContent = '⚠ unverified — click to retry';
+    showToast(e.message, 'err');
+  }
+}
+
+async function resendVerification() {
+  const btn = document.getElementById('resend-verify-btn');
+  btn.textContent = '⏳ Sending…';
+  btn.disabled    = true;
+  try {
+    const r = await fetch('/api/auth/resend-verification', {
+      method: 'POST', headers: authH()
+    });
+    const d = await r.json();
+    if (r.ok) {
+      showToast('✉ Verification email sent! Check your inbox.', 'ok');
+      btn.textContent = '✉ Email sent!';
+    } else {
+      showToast(d.detail || 'Failed to send email', 'err');
+      btn.textContent = '✉ Send verification email';
+      btn.disabled    = false;
+    }
+  } catch(e) {
+    showToast(e.message, 'err');
+    btn.textContent = '✉ Send verification email';
+    btn.disabled    = false;
+  }
+}
+
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.className = `toast ${type} show`;
+  setTimeout(() => t.classList.remove('show'), 3200);
+}
+</script>
+</body>
+</html>

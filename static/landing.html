@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>RecoMind — AI Recommendation Engine</title>
+<meta name="description" content="Upload your documents and get AI-powered recommendations instantly. Built for teams, powered by vector search and local LLMs."/>
+<meta property="og:title" content="RecoMind — AI Recommendation Engine"/>
+<meta property="og:description" content="Chat with your documents. Get the best recommendation every time."/>
+<meta property="og:type" content="website"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,400&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --bg:#080a0e;--bg2:#0d1018;--bg3:#131822;--bg4:#1a2030;
+  --border:#1c2535;--border2:#263040;
+  --accent:#00e5a0;--accent2:#00b87a;--accent-dim:#00e5a012;--accent-glow:#00e5a030;
+  --text:#c8d4e3;--text-dim:#4a5a70;--text-mid:#7a8fa8;
+  --red:#ff5f6d;--yellow:#ffd166;--blue:#4da6ff;--purple:#a78bfa;
+  --mono:'Space Mono',monospace;--sans:'DM Sans',sans-serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);overflow-x:hidden}
+
+/* ── NOISE TEXTURE ── */
+body::before{content:'';position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:0;opacity:.4}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;
+  padding:16px 48px;display:flex;align-items:center;gap:16px;
+  background:rgba(8,10,14,.85);backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border)}
+.nav-logo{display:flex;align-items:center;gap:10px;text-decoration:none}
+.logo-icon{width:30px;height:30px;background:var(--accent);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:14px;font-weight:700;color:#000}
+.logo-text{font-family:var(--mono);font-size:14px;color:var(--text);letter-spacing:.04em}
+.nav-links{display:flex;gap:28px;margin-left:40px}
+.nav-links a{font-size:13px;color:var(--text-mid);text-decoration:none;transition:color .2s}
+.nav-links a:hover{color:var(--text)}
+.nav-right{margin-left:auto;display:flex;gap:10px;align-items:center}
+.btn-ghost{font-family:var(--mono);font-size:12px;padding:7px 16px;border-radius:20px;
+  border:1px solid var(--border2);color:var(--text-mid);background:none;
+  cursor:pointer;text-decoration:none;transition:all .2s}
+.btn-ghost:hover{border-color:var(--accent);color:var(--accent)}
+.btn-primary{font-family:var(--mono);font-size:12px;padding:7px 18px;border-radius:20px;
+  border:none;background:var(--accent);color:#000;cursor:pointer;
+  text-decoration:none;font-weight:700;transition:all .2s}
+.btn-primary:hover{background:var(--accent2);transform:translateY(-1px)}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;
+  justify-content:center;text-align:center;padding:120px 24px 80px;
+  position:relative;overflow:hidden}
+
+/* Glow orbs */
+.orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+.orb-1{width:600px;height:600px;background:radial-gradient(circle,#00e5a018 0%,transparent 70%);
+  top:-100px;left:50%;transform:translateX(-50%)}
+.orb-2{width:400px;height:400px;background:radial-gradient(circle,#4da6ff0d 0%,transparent 70%);
+  bottom:0;right:-100px}
+.orb-3{width:300px;height:300px;background:radial-gradient(circle,#a78bfa0d 0%,transparent 70%);
+  top:200px;left:-80px}
+
+.hero-badge{display:inline-flex;align-items:center;gap:6px;padding:5px 14px;
+  border-radius:20px;border:1px solid var(--accent-glow);background:var(--accent-dim);
+  font-family:var(--mono);font-size:11px;color:var(--accent);margin-bottom:28px;
+  animation:fadeUp .6s ease}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);
+  animation:pulse 2s infinite}
+
+h1{font-size:clamp(36px,6vw,72px);font-weight:600;line-height:1.1;
+  margin-bottom:20px;animation:fadeUp .6s .1s ease both}
+h1 em{font-style:normal;color:var(--accent)}
+h1 .line2{display:block;color:var(--text-mid);font-weight:300}
+
+.hero-sub{font-size:clamp(15px,2vw,19px);color:var(--text-mid);max-width:560px;
+  line-height:1.7;margin-bottom:40px;animation:fadeUp .6s .2s ease both}
+
+.hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;
+  animation:fadeUp .6s .3s ease both}
+.cta-primary{padding:14px 32px;border-radius:12px;background:var(--accent);
+  color:#000;font-family:var(--sans);font-size:15px;font-weight:600;
+  text-decoration:none;border:none;cursor:pointer;transition:all .25s;
+  box-shadow:0 0 40px var(--accent-glow)}
+.cta-primary:hover{background:var(--accent2);transform:translateY(-2px);
+  box-shadow:0 0 60px var(--accent-glow)}
+.cta-secondary{padding:14px 32px;border-radius:12px;background:none;
+  color:var(--text);font-family:var(--sans);font-size:15px;
+  text-decoration:none;border:1px solid var(--border2);transition:all .2s}
+.cta-secondary:hover{border-color:var(--accent);color:var(--accent)}
+
+.hero-note{margin-top:16px;font-size:12px;color:var(--text-dim);
+  animation:fadeUp .6s .4s ease both}
+
+/* ── DEMO CARD ── */
+.demo-wrap{margin-top:80px;max-width:780px;width:100%;
+  animation:fadeUp .8s .5s ease both;position:relative}
+.demo-card{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;
+  overflow:hidden;box-shadow:0 40px 80px rgba(0,0,0,.6)}
+.demo-bar{display:flex;align-items:center;gap:8px;padding:12px 16px;
+  background:var(--bg3);border-bottom:1px solid var(--border)}
+.demo-dot{width:10px;height:10px;border-radius:50%}
+.demo-url{font-family:var(--mono);font-size:11px;color:var(--text-dim);
+  margin-left:8px;flex:1;text-align:center}
+.demo-body{padding:20px;display:flex;flex-direction:column;gap:12px}
+.demo-msg{display:flex;gap:10px;align-items:flex-start}
+.demo-avatar{width:28px;height:28px;border-radius:7px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:13px}
+.demo-bubble{padding:10px 14px;border-radius:10px;font-size:13px;line-height:1.6;flex:1}
+.demo-user .demo-avatar{background:var(--accent-dim);border:1px solid var(--accent);color:var(--accent)}
+.demo-user .demo-bubble{background:var(--accent-dim);border:1px solid #00e5a025;text-align:right}
+.demo-ai   .demo-avatar{background:var(--bg4);border:1px solid var(--border2)}
+.demo-ai   .demo-bubble{background:var(--bg4);border:1px solid var(--border)}
+.demo-reco{background:var(--bg3);border:1px solid var(--border2);border-radius:10px;
+  overflow:hidden;margin-top:4px}
+.demo-reco-header{display:flex;align-items:center;gap:8px;padding:10px 14px;
+  background:var(--accent-dim);border-bottom:1px solid var(--border2)}
+.demo-reco-badge{font-family:var(--mono);font-size:10px;padding:2px 8px;
+  border-radius:10px;background:var(--accent);color:#000}
+.demo-reco-bar{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.demo-reco-fill{height:100%;width:91%;background:var(--accent);border-radius:2px}
+.demo-reco-conf{font-family:var(--mono);font-size:10px;color:var(--accent)}
+.demo-reco-body{padding:12px 14px;font-size:13px;color:var(--text-mid);line-height:1.6}
+.demo-reco-title{font-size:15px;font-weight:500;color:var(--text);margin-bottom:6px}
+.demo-typing{display:flex;gap:4px;padding:4px 0}
+.demo-typing span{width:6px;height:6px;border-radius:50%;background:var(--text-dim);
+  animation:typing 1.2s infinite}
+.demo-typing span:nth-child(2){animation-delay:.2s}
+.demo-typing span:nth-child(3){animation-delay:.4s}
+@keyframes typing{0%,80%,100%{transform:scale(.8);opacity:.5}40%{transform:scale(1);opacity:1}}
+
+/* ── SECTION COMMON ── */
+section{padding:100px 24px;position:relative;z-index:1}
+.section-label{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  color:var(--accent);text-transform:uppercase;margin-bottom:14px}
+.section-title{font-size:clamp(28px,4vw,44px);font-weight:600;line-height:1.2;margin-bottom:16px}
+.section-sub{font-size:16px;color:var(--text-mid);max-width:520px;line-height:1.7;margin-bottom:60px}
+.center{text-align:center}
+.center .section-sub{margin-left:auto;margin-right:auto}
+
+/* ── HOW IT WORKS ── */
+.how-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:24px;max-width:1000px;margin:0 auto}
+.how-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:28px 24px;transition:border-color .2s,transform .2s;position:relative}
+.how-card:hover{border-color:var(--border2);transform:translateY(-3px)}
+.how-num{font-family:var(--mono);font-size:10px;color:var(--accent);
+  background:var(--accent-dim);border:1px solid var(--accent-glow);
+  width:28px;height:28px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;margin-bottom:16px}
+.how-icon{font-size:28px;margin-bottom:14px}
+.how-title{font-size:16px;font-weight:500;margin-bottom:8px}
+.how-desc{font-size:13px;color:var(--text-mid);line-height:1.65}
+.how-connector{position:absolute;top:50%;right:-13px;width:24px;height:2px;
+  background:var(--border2);z-index:2}
+
+/* ── FEATURES ── */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;max-width:1100px;margin:0 auto}
+.feat-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+  padding:24px;transition:all .2s}
+.feat-card:hover{border-color:var(--border2);background:var(--bg3)}
+.feat-icon{font-size:24px;margin-bottom:12px}
+.feat-title{font-size:15px;font-weight:500;margin-bottom:6px}
+.feat-desc{font-size:13px;color:var(--text-mid);line-height:1.6}
+.feat-tag{display:inline-block;font-family:var(--mono);font-size:9px;
+  padding:2px 7px;border-radius:6px;margin-top:10px}
+.feat-tag.pro{background:var(--accent-dim);color:var(--accent);border:1px solid var(--accent-glow)}
+.feat-tag.free{background:#4da6ff12;color:var(--blue);border:1px solid #4da6ff30}
+
+/* ── STATS ── */
+.stats-section{background:var(--bg2);border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);padding:60px 24px}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:40px;max-width:800px;margin:0 auto;text-align:center}
+.stat-num{font-family:var(--mono);font-size:40px;font-weight:700;color:var(--accent);
+  line-height:1}
+.stat-label{font-size:13px;color:var(--text-dim);margin-top:6px}
+
+/* ── TESTIMONIALS ── */
+.testi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+  gap:20px;max-width:1000px;margin:0 auto}
+.testi-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;padding:24px}
+.testi-text{font-size:14px;color:var(--text-mid);line-height:1.7;
+  margin-bottom:16px;font-style:italic}
+.testi-text::before{content:'"';color:var(--accent);font-size:24px;
+  font-family:Georgia,serif;line-height:.5;vertical-align:-.4em;margin-right:4px}
+.testi-author{display:flex;align-items:center;gap:10px}
+.testi-avatar{width:36px;height:36px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:13px;font-weight:700;flex-shrink:0}
+.testi-name{font-size:13px;font-weight:500}
+.testi-role{font-size:11px;color:var(--text-dim)}
+
+/* ── PRICING STRIP ── */
+.pricing-strip{background:var(--bg2);border:1px solid var(--border2);
+  border-radius:16px;padding:40px;max-width:700px;margin:0 auto;text-align:center}
+.pricing-strip h3{font-size:24px;font-weight:600;margin-bottom:8px}
+.pricing-strip p{color:var(--text-mid);font-size:14px;margin-bottom:28px}
+.pricing-plans{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.pricing-plan{padding:12px 20px;border-radius:10px;border:1px solid var(--border2);
+  background:var(--bg3);text-align:center;min-width:140px}
+.pricing-plan.pop{border-color:var(--accent);background:var(--accent-dim)}
+.plan-name2{font-family:var(--mono);font-size:10px;color:var(--text-dim);margin-bottom:4px}
+.plan-price2{font-size:22px;font-weight:600;color:var(--text)}
+.plan-price2 span{font-size:12px;color:var(--text-dim);font-weight:400}
+.pricing-plan.pop .plan-name2{color:var(--accent)}
+.pricing-note{font-size:12px;color:var(--text-dim)}
+
+/* ── CTA SECTION ── */
+.cta-section{text-align:center;padding:120px 24px}
+.cta-section h2{font-size:clamp(28px,5vw,52px);font-weight:600;margin-bottom:16px}
+.cta-section p{font-size:16px;color:var(--text-mid);max-width:440px;
+  margin:0 auto 36px;line-height:1.7}
+.cta-big{padding:16px 40px;border-radius:14px;background:var(--accent);color:#000;
+  font-size:16px;font-weight:600;text-decoration:none;border:none;cursor:pointer;
+  transition:all .25s;display:inline-block;
+  box-shadow:0 0 60px var(--accent-glow)}
+.cta-big:hover{background:var(--accent2);transform:translateY(-2px)}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:40px 48px;
+  display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px}
+.footer-logo{font-family:var(--mono);font-size:13px;color:var(--accent)}
+.footer-links{display:flex;gap:24px}
+.footer-links a{font-size:13px;color:var(--text-dim);text-decoration:none;transition:color .2s}
+.footer-links a:hover{color:var(--text)}
+.footer-copy{font-size:12px;color:var(--text-dim)}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .6s ease,transform .6s ease}
+.reveal.visible{opacity:1;transform:none}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  nav{padding:14px 20px}
+  .nav-links{display:none}
+  .hero{padding:100px 20px 60px}
+  section{padding:70px 20px}
+  footer{flex-direction:column;padding:30px 20px;text-align:center}
+  .footer-links{justify-content:center}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="nav-logo" href="/">
+    <div class="logo-icon">R</div>
+    <span class="logo-text">RecoMind</span>
+  </a>
+  <div class="nav-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="/pricing">Pricing</a>
+  </div>
+  <div class="nav-right">
+    <a class="btn-ghost" href="/login">Sign in</a>
+    <a class="btn-primary" href="/login">Get started free</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+
+  <div class="hero-badge">
+    <span class="dot"></span>
+    AI-powered · 100% private · runs locally
+  </div>
+
+  <h1>
+    Get the best recommendation
+    <em class="line2">from your own documents</em>
+  </h1>
+
+  <p class="hero-sub">
+    Upload any file. Ask anything. RecoMind finds the most relevant answer
+    and explains exactly why — powered by vector search, re-ranking, and local AI.
+  </p>
+
+  <div class="hero-cta">
+    <a class="cta-primary" href="/login">Start for free →</a>
+    <a class="cta-secondary" href="#how">See how it works</a>
+  </div>
+  <p class="hero-note">Free plan · No credit card · Works offline with Docker</p>
+
+  <!-- Demo card -->
+  <div class="demo-wrap">
+    <div class="demo-card">
+      <div class="demo-bar">
+        <div class="demo-dot" style="background:#ff5f6d"></div>
+        <div class="demo-dot" style="background:#ffd166"></div>
+        <div class="demo-dot" style="background:#00e5a0"></div>
+        <span class="demo-url">app.recomind.ai</span>
+      </div>
+      <div class="demo-body">
+        <div class="demo-msg demo-user">
+          <div style="flex:1">
+            <div class="demo-bubble">Which strategy should I use to quit smoking based on our health guide?</div>
+          </div>
+          <div class="demo-avatar">U</div>
+        </div>
+        <div class="demo-msg demo-ai">
+          <div class="demo-avatar">⚡</div>
+          <div style="flex:1">
+            <div class="demo-reco">
+              <div class="demo-reco-header">
+                <span class="demo-reco-badge">⭐ Best Match</span>
+                <div class="demo-reco-bar"><div class="demo-reco-fill"></div></div>
+                <span class="demo-reco-conf">91% High confidence</span>
+              </div>
+              <div class="demo-reco-body">
+                <div class="demo-reco-title">Nicotine Replacement Therapy (NRT)</div>
+                NRT is the most evidence-backed strategy in your guide — patches or gum reduce withdrawal symptoms by 50–70%. Combined with the identity-shift framework on page 14, success rates double compared to cold turkey.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<div class="stats-section reveal">
+  <div class="stats-grid">
+    <div><div class="stat-num">768</div><div class="stat-label">Embedding dimensions</div></div>
+    <div><div class="stat-num">15×</div><div class="stat-label">Candidates re-ranked</div></div>
+    <div><div class="stat-num">6</div><div class="stat-label">File formats supported</div></div>
+    <div><div class="stat-num">3</div><div class="stat-label">Free LLM backends</div></div>
+    <div><div class="stat-num">₹0</div><div class="stat-label">To get started</div></div>
+  </div>
+</div>
+
+<!-- HOW IT WORKS -->
+<section id="how">
+  <div class="center reveal">
+    <div class="section-label">How it works</div>
+    <h2 class="section-title">From document to recommendation<br>in seconds</h2>
+  </div>
+  <div class="how-grid reveal">
+    <div class="how-card">
+      <div class="how-num">01</div>
+      <div class="how-icon">📂</div>
+      <div class="how-title">Upload your docs</div>
+      <div class="how-desc">Drop in PDFs, Word files, CSVs, Markdown — any format. RecoMind chunks and embeds them automatically.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">02</div>
+      <div class="how-icon">🔍</div>
+      <div class="how-title">Vector search</div>
+      <div class="how-desc">Your query is embedded and matched against all chunks using cosine similarity across 768 dimensions.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">03</div>
+      <div class="how-icon">⚖️</div>
+      <div class="how-title">Re-rank for precision</div>
+      <div class="how-desc">A CrossEncoder model re-scores the top 15 candidates and keeps only the 3 most relevant chunks.</div>
+    </div>
+    <div class="how-card">
+      <div class="how-num">04</div>
+      <div class="how-icon">⭐</div>
+      <div class="how-title">Smart recommendation</div>
+      <div class="how-desc">A local LLM synthesises the best answer with confidence score, reasoning, and alternatives.</div>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features" style="background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border)">
+  <div class="center reveal">
+    <div class="section-label">Features</div>
+    <h2 class="section-title">Everything you need,<br>nothing you don't</h2>
+    <p class="section-sub">Built for privacy-first teams who want AI without sending data to the cloud.</p>
+  </div>
+  <div class="features-grid reveal">
+    <div class="feat-card">
+      <div class="feat-icon">🧠</div>
+      <div class="feat-title">Local LLM — zero API cost</div>
+      <div class="feat-desc">Runs on Docker Model Runner, Ollama, or Groq. Your data never leaves your machine.</div>
+      <span class="feat-tag free">FREE</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⚡</div>
+      <div class="feat-title">CrossEncoder re-ranking</div>
+      <div class="feat-desc">Fetches 15 candidates, re-scores with a 22M-param model, returns only the 3 best.</div>
+      <span class="feat-tag free">FREE</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⭐</div>
+      <div class="feat-title">Recommendation cards</div>
+      <div class="feat-desc">Structured answers with best match, confidence score, why it fits, and alternatives.</div>
+      <span class="feat-tag pro">PRO</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">👍</div>
+      <div class="feat-title">Feedback loop</div>
+      <div class="feat-desc">Thumbs up/down on every answer. The engine learns and improves with every interaction.</div>
+      <span class="feat-tag free">FREE</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📂</div>
+      <div class="feat-title">6 file formats</div>
+      <div class="feat-desc">PDF, DOCX, TXT, CSV, JSON, Markdown, HTML — drag and drop, done.</div>
+      <span class="feat-tag free">FREE</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🔒</div>
+      <div class="feat-title">Per-user isolation</div>
+      <div class="feat-desc">Every user's documents and searches are completely isolated. No cross-contamination.</div>
+      <span class="feat-tag free">FREE</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">💳</div>
+      <div class="feat-title">Indian payments</div>
+      <div class="feat-desc">Pay via UPI, cards, or net banking with Razorpay. International users can use PayPal.</div>
+      <span class="feat-tag pro">PRO</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🌐</div>
+      <div class="feat-title">REST API</div>
+      <div class="feat-desc">Full API access for developers. Integrate RecoMind into any app with a few lines of code.</div>
+      <span class="feat-tag pro">PRO</span>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📊</div>
+      <div class="feat-title">Analytics</div>
+      <div class="feat-desc">See which documents get queried most, satisfaction rates, and usage trends.</div>
+      <span class="feat-tag pro">PRO</span>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section>
+  <div class="center reveal">
+    <div class="section-label">Early users</div>
+    <h2 class="section-title">What people are saying</h2>
+  </div>
+  <div class="testi-grid reveal">
+    <div class="testi-card">
+      <div class="testi-text">I uploaded our 200-page HR policy and now anyone on the team can ask questions in plain English and get the right answer instantly.</div>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#00e5a020;color:var(--accent)">P</div>
+        <div><div class="testi-name">Priya K.</div><div class="testi-role">HR Manager, Bangalore</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-text">Finally a RAG tool that works in India — UPI payments, local models, no US credit card needed. This is what we've been waiting for.</div>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#4da6ff20;color:var(--blue)">R</div>
+        <div><div class="testi-name">Rahul M.</div><div class="testi-role">Startup Founder, Pune</div></div>
+      </div>
+    </div>
+    <div class="testi-card">
+      <div class="testi-text">The recommendation card format is brilliant — not just "here's the context" but "here's the best answer and why". Huge difference.</div>
+      <div class="testi-author">
+        <div class="testi-avatar" style="background:#a78bfa20;color:var(--purple)">S</div>
+        <div><div class="testi-name">Sneha T.</div><div class="testi-role">Product Manager, Mumbai</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING STRIP -->
+<section style="padding:60px 24px">
+  <div class="pricing-strip reveal">
+    <h3>Simple pricing</h3>
+    <p>Start free. Upgrade when you need more. Cancel anytime.</p>
+    <div class="pricing-plans">
+      <div class="pricing-plan">
+        <div class="plan-name2">FREE</div>
+        <div class="plan-price2">₹0</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px">50 queries · 5 docs</div>
+      </div>
+      <div class="pricing-plan pop">
+        <div class="plan-name2">PRO</div>
+        <div class="plan-price2">₹1,599<span>/mo</span></div>
+        <div style="font-size:11px;color:var(--accent);margin-top:4px">Unlimited · 100 docs</div>
+      </div>
+      <div class="pricing-plan">
+        <div class="plan-name2">TEAM</div>
+        <div class="plan-price2">₹6,599<span>/mo</span></div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:4px">Unlimited · 10 users</div>
+      </div>
+    </div>
+    <a href="/pricing" class="btn-primary" style="display:inline-block;padding:10px 28px;text-decoration:none">See full pricing →</a>
+    <div class="pricing-note" style="margin-top:12px">Pay with UPI, cards, or PayPal · Cancel anytime</div>
+  </div>
+</section>
+
+<!-- FINAL CTA -->
+<section class="cta-section reveal">
+  <h2>Ready to get smarter<br>recommendations?</h2>
+  <p>Join teams using RecoMind to unlock the knowledge inside their documents.</p>
+  <a class="cta-big" href="/login">Get started for free →</a>
+  <div style="margin-top:16px;font-size:12px;color:var(--text-dim)">
+    Free plan · No credit card · Setup in 2 minutes
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">RecoMind</div>
+  <div class="footer-links">
+    <a href="#how">How it works</a>
+    <a href="#features">Features</a>
+    <a href="/pricing">Pricing</a>
+    <a href="/login">Sign in</a>
+  </div>
+  <div class="footer-copy">© 2026 RecoMind · Built with ❤️ in India</div>
+</footer>
+
+<script>
+// Scroll reveal
+const observer = new IntersectionObserver(
+  entries => entries.forEach(e => { if(e.isIntersecting) e.target.classList.add('visible'); }),
+  {threshold: 0.12}
+);
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Redirect logged-in users to dashboard
+const token = localStorage.getItem('recomind_token');
+if (token) {
+  document.querySelectorAll('a[href="/login"]').forEach(a => {
+    a.href        = '/';
+    a.textContent = a.textContent.includes('free') ? 'Go to dashboard →' : 'Dashboard';
+  });
+}
+</script>
+</body>
+</html>
