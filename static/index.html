@@ -599,7 +599,7 @@ async function loadStats() {
 async function loadBackends() {
   try {
     const d = await fetch('/api/backends').then(r => r.json());
-    currentBackend = d.current || 'docker';
+    currentBackend = d.current || 'groq';
     selectBackend(currentBackend);
     // Dim unconfigured cloud backends
     if (!d.groq?.configured)        dimBackend('groq');
