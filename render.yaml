@@ -1,0 +1,66 @@
+  services:
+  - type: web
+    name: recomind
+    runtime: python
+    region: singapore          # closest to India
+    plan: free                 # upgrade to starter ($7/mo) for always-on
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/stats
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.12"
+      - key: MONGODB_URI
+        sync: false            # set manually in Render dashboard
+      - key: JWT_SECRET
+        generateValue: true    # Render auto-generates a secure random value
+      - key: APP_URL
+        sync: false            # set to your render URL e.g. https://recomind.onrender.com
+      - key: LLM_BACKEND
+        value: groq            # use Groq (free cloud) on Render — no Docker available
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.1-8b-instant
+      - key: EMBED_BACKEND
+        value: local           # use sentence-transformers on Render
+      - key: EMBED_MODEL
+        value: BAAI/bge-small-en-v1.5
+      - key: RERANK_MODEL
+        value: cross-encoder/ms-marco-MiniLM-L-6-v2
+      - key: RERANK_ENABLED
+        value: "true"
+      - key: DB_NAME
+        value: knowledge_base
+      - key: COLLECTION
+        value: docs
+      - key: INDEX_NAME
+        value: vector_idx
+      - key: EMAIL_HOST
+        value: smtp.gmail.com
+      - key: EMAIL_PORT
+        value: "587"
+      - key: EMAIL_HOST_USER
+        sync: false
+      - key: EMAIL_HOST_PASSWORD
+        sync: false
+      - key: EMAIL_FROM_NAME
+        value: RecoMind
+      - key: PAYPAL_MODE
+        value: live
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_SECRET
+        sync: false
+      - key: PAYPAL_PLAN_PRO
+        sync: false
+      - key: PAYPAL_PLAN_TEAM
+        sync: false
+      - key: RAZORPAY_KEY_ID
+        sync: false
+      - key: RAZORPAY_KEY_SECRET
+        sync: false
+      - key: RAZORPAY_PLAN_PRO
+        sync: false
+      - key: RAZORPAY_PLAN_TEAM
+        sync: false

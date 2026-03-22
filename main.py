@@ -30,7 +30,8 @@ logging.basicConfig(
     datefmt="%H:%M:%S",
 )
 log = logging.getLogger("main")
-APP_URL = os.getenv("APP_URL", "http://localhost:8000")
+APP_URL  = os.getenv("APP_URL",  "http://localhost:8000")
+PORT     = int(os.getenv("PORT",    "8000"))
 
 # ── Core imports ──────────────────────────────────────────────────────────────
 from core.vector_store import (
@@ -80,11 +81,14 @@ async def lifespan(app: FastAPI):
     log.info("Warming up re-ranker …")
     warm_up_reranker()
 
-    # Warm up Docker LLM
-    if os.getenv("LLM_BACKEND", "docker") == "docker":
+    # Warm up LLM backend (only Docker needs explicit warmup)
+    backend = os.getenv("LLM_BACKEND", "docker")
+    if backend == "docker":
         log.info("Warming up Docker LLM …")
         ok = docker_warmup()
         log.info("Docker LLM ready ✓" if ok else "Docker LLM warmup skipped")
+    else:
+        log.info(f"LLM backend: {backend} (no warmup needed)")
 
     # Ensure vector index exists
     get_collection()
@@ -105,6 +109,33 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="RecoMind API", version="4.0", lifespan=lifespan)
+
+# ── CORS (allow frontend to call API from any origin in dev, restrict in prod) ──
+from fastapi.middleware.cors import CORSMiddleware
+ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins    = ALLOWED_ORIGINS,
+    allow_credentials= True,
+    allow_methods    = ["*"],
+    allow_headers    = ["*"],
+)
+
+# ── Rate limiting — protect public endpoints ──────────────────────────────────
+from collections import defaultdict
+import time as _time
+
+_rate_store: dict = defaultdict(list)
+
+def _is_rate_limited(key: str, max_requests: int = 60, window: int = 60) -> bool:
+    """Simple in-memory rate limiter (use Redis in production for multi-instance)."""
+    now  = _time.time()
+    hits = [t for t in _rate_store[key] if now - t < window]
+    _rate_store[key] = hits
+    if len(hits) >= max_requests:
+        return True
+    _rate_store[key].append(now)
+    return False
 
 # ── Static files ──────────────────────────────────────────────────────────────
 Path("static").mkdir(exist_ok=True)
@@ -185,6 +216,11 @@ async def _check_query_limit(user: User) -> None:
 # ════════════════════════════════════════════════════════════════════════════
 # UI
 # ════════════════════════════════════════════════════════════════════════════
+
+@app.get("/health")
+async def health():
+    """Health check for Render — returns 200 when app is ready."""
+    return {"status": "ok", "version": "4.0"}
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_landing():
@@ -465,9 +501,13 @@ async def search(req: SearchRequest,
 # ════════════════════════════════════════════════════════════════════════════
 
 @app.post("/api/chat")
-async def chat(req: ChatRequest,
+async def chat(req: ChatRequest, request: Request,
                user: User = Depends(current_active_user)):
     """RAG + Re-rank + Recommendation endpoint — requires auth."""
+
+    # Rate limit: 30 requests/min per user
+    if _is_rate_limited(f"chat:{user.id}", max_requests=30, window=60):
+        raise HTTPException(429, "Too many requests — please wait a moment")
 
     # Enforce plan limits
     await _check_query_limit(user)
