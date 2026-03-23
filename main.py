@@ -70,21 +70,20 @@ from core.auth import (
 # ── App lifecycle ─────────────────────────────────────────────────────────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    log.info("Starting up …")
+    # ── Bind port FIRST, init everything else in background ──────────────────
+    # This ensures Render sees an open port immediately and doesn't time out.
+    log.info("Starting up — binding port ...")
 
-    # Init auth DB first (fast)
-    await init_db()
-    log.info("Auth DB ready ✓")
-
-    # Load ML models + DB in background so port binds immediately
-    import asyncio
-    async def _background_init():
+    async def _full_init():
+        import asyncio
+        await asyncio.sleep(0.1)   # yield to let port bind
         try:
-            log.info("Loading embedding model ...")
+            await init_db()
+            log.info("Auth DB ready ✓")
             warm_up_embedder()
-            log.info("Loading re-ranker ...")
+            log.info("Embedder ready ✓")
             warm_up_reranker()
-            log.info("Connecting to MongoDB ...")
+            log.info("Re-ranker ready ✓")
             get_collection()
             ensure_index()
             docs_folder = os.getenv("DOCS_FOLDER", "documents")
@@ -93,15 +92,19 @@ async def lifespan(app: FastAPI):
                 if docs:
                     n = insert_documents(docs)
                     log.info(f"Auto-ingested {n} chunks from '{docs_folder}'")
-            log.info("Background init complete ✓")
+            log.info("All systems ready ✓")
         except Exception as exc:
-            log.error(f"Background init error: {exc}")
+            log.error(f"Init error: {exc}")
 
-    asyncio.create_task(_background_init())
+    import asyncio
+    asyncio.create_task(_full_init())
 
     yield
     close_connection()
-    await close_db()
+    try:
+        await close_db()
+    except Exception:
+        pass
     log.info("Shutdown complete.")
 
 
