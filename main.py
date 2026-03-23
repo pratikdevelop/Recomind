@@ -72,35 +72,32 @@ from core.auth import (
 async def lifespan(app: FastAPI):
     log.info("Starting up …")
 
-    # Init Beanie (async MongoDB ODM for users)
+    # Init auth DB first (fast)
     await init_db()
     log.info("Auth DB ready ✓")
 
-    # Warm up ML models
-    warm_up_embedder()
-    log.info("Warming up re-ranker …")
-    warm_up_reranker()
+    # Load ML models + DB in background so port binds immediately
+    import asyncio
+    async def _background_init():
+        try:
+            log.info("Loading embedding model ...")
+            warm_up_embedder()
+            log.info("Loading re-ranker ...")
+            warm_up_reranker()
+            log.info("Connecting to MongoDB ...")
+            get_collection()
+            ensure_index()
+            docs_folder = os.getenv("DOCS_FOLDER", "documents")
+            if Path(docs_folder).is_dir():
+                docs = load_folder(docs_folder)
+                if docs:
+                    n = insert_documents(docs)
+                    log.info(f"Auto-ingested {n} chunks from '{docs_folder}'")
+            log.info("Background init complete ✓")
+        except Exception as exc:
+            log.error(f"Background init error: {exc}")
 
-    # Warm up LLM backend (only Docker needs explicit warmup)
-    backend = os.getenv("LLM_BACKEND", "docker")
-    if backend == "docker":
-        log.info("Warming up Docker LLM …")
-        ok = docker_warmup()
-        log.info("Docker LLM ready ✓" if ok else "Docker LLM warmup skipped")
-    else:
-        log.info(f"LLM backend: {backend} (no warmup needed)")
-
-    # Ensure vector index exists
-    get_collection()
-    ensure_index()
-
-    # Auto-ingest ./documents folder (shared / demo data, no user_id)
-    docs_folder = os.getenv("DOCS_FOLDER", "documents")
-    if Path(docs_folder).is_dir():
-        docs = load_folder(docs_folder)
-        if docs:
-            n = insert_documents(docs)
-            log.info(f"Auto-ingested {n} chunks from '{docs_folder}'")
+    asyncio.create_task(_background_init())
 
     yield
     close_connection()
