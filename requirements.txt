@@ -1,9 +1,8 @@
-# ── Core ──────────────────────────────────────────────────────────────────────
+# ── Core DB ───────────────────────────────────────────────────────────────────
 pymongo>=4.7
-sentence-transformers>=2.7
 python-dotenv>=1.0
 
-# ── Auth ──────────────────────────────────────────────────────────────────────
+# ── Auth ─────────────────────────────────────────────────────────────────────
 fastapi-users[beanie]>=13.0
 motor>=3.3
 
@@ -11,17 +10,18 @@ motor>=3.3
 fastapi>=0.111
 uvicorn[standard]>=0.29
 python-multipart>=0.0.9
+gunicorn>=21.2
 
-# ── File format support ────────────────────────────────────────────────────────
+# ── File formats ──────────────────────────────────────────────────────────────
 pypdf>=4.0
 python-docx>=1.1
 beautifulsoup4>=4.12
 
-# ── Re-ranker ─────────────────────────────────────────────────────────────────
-# sentence-transformers already listed above (CrossEncoder included)
-
-# ── Payments ──────────────────────────────────────────────────────────────────
+# ── HTTP client (Groq + Jina embeddings) ─────────────────────────────────────
 requests>=2.31
 
-# ── Production ────────────────────────────────────────────────────────────────
-gunicorn>=21.0
+# ── Reranker (lightweight CPU — no CUDA) ─────────────────────────────────────
+# torch CPU-only: ~250MB instead of 3.5GB with CUDA
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.2.2+cpu
+sentence-transformers>=2.7
