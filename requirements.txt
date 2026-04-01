@@ -23,5 +23,5 @@ requests>=2.31
 # ── Reranker (lightweight CPU — no CUDA) ─────────────────────────────────────
 # torch CPU-only: ~250MB instead of 3.5GB with CUDA
 --extra-index-url https://download.pytorch.org/whl/cpu
-torch==2.2.2+cpu
+torch==2.9.0+cpu
 sentence-transformers>=2.7
